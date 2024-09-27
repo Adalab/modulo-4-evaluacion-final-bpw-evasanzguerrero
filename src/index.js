@@ -154,3 +154,41 @@ server.get('/lugares/:id',async (req, res) => {
 
   conn.close();
 });
+
+server.post('/series', async(req, res) => {
+  
+  const conn = await getConnection();
+  
+  if( !conn ) {
+    res.status(500).send('Se rompió');
+    return;
+  }
+
+  console.log(req.body)
+  
+  const [results] = await conn.execute(
+    `INSERT INTO series (titulo, creador, lanzamiento, genero) VALUES (?, ?, ?, ?)` ,
+    [req.body.titulo, req.body.creador, req.body.lanzamiento, req.body.genero]);
+    
+  const serieId = results.insertId;
+
+  for (const personaje of req.body.personajes) {
+    const [personajeResult] = await conn.execute(
+      `INSERT INTO personajes (nombre, descripcion, tipo, serie_id) VALUES (?, ?, ?, ?)` ,
+      [personaje.nombre, personaje.descripcion, personaje.tipo, serieId]);
+    const personajeId = personajeResult.insertId;
+    
+    for (const lugar of personaje.lugares) {
+      await conn.execute(
+        `INSERT INTO lugares (nombre, caracteristicas, personaje_id) VALUES (?, ?, ?)` ,
+        [lugar.nombre, lugar.caracteristicas, personajeId]);
+    }
+  }
+
+  res.json({
+    success: true,
+    id: serieId
+  });
+
+  conn.close();
+});
