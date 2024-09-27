@@ -18,7 +18,7 @@ server.get('/series',async (_, res) => {
 
 server.get('/series/:id',async (req, res) => {
   const conn = await getConnection();
-  console.log(req.params.id);
+  
   if(!conn) {
     res.status(500).send('Se rompió');
     return;
