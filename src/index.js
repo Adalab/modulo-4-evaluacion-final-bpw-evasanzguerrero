@@ -41,6 +41,25 @@ server.get('/series/:id',async (req, res) => {
   conn.close();
 });
 
+server.get('/series/:id/personajes',async (req, res) => {
+  const conn = await getConnection();
+
+  if(!conn) {
+    res.status(500).send('connection lost');
+    return;
+  }
+
+  const [results] = await conn.query('Select * from personajes where serie_id = ?;',[req.params.id]);
+
+  const data = {
+    success: true,
+    serie: results
+  };
+  res.json(data);
+
+  conn.close();
+});
+
 server.get('/series/titulo/:titulo',async (req, res) => {
   const conn = await getConnection();
   
@@ -182,6 +201,58 @@ server.post('/series', async(req, res) => {
       await conn.execute(
         `INSERT INTO lugares (nombre, caracteristicas, personaje_id) VALUES (?, ?, ?)` ,
         [lugar.nombre, lugar.caracteristicas, personajeId]);
+    }
+  }
+
+  res.json({
+    success: true,
+    id: serieId
+  });
+
+  conn.close();
+});
+
+server.post('/series/:id', async(req, res) => {
+  const conn = await getConnection();
+  
+  if (!conn) {
+    res.status(500).send('Se rompió');
+    return;
+  }
+
+  const serieId = req.params.id;
+
+  await conn.execute(
+    `UPDATE series SET titulo = ?, creador = ?, lanzamiento = ?, genero = ? WHERE id = ?`,
+    [req.body.titulo, req.body.creador, req.body.lanzamiento, req.body.genero, serieId]
+  );
+
+  for (const personaje of req.body.personajes) {
+    if (personaje.id) {
+      await conn.execute(
+        `UPDATE personajes SET nombre = ?, descripcion = ?, tipo = ? WHERE id = ?`,
+        [personaje.nombre, personaje.descripcion, personaje.tipo, personaje.id]
+      );
+    } else {
+      const [personajeResult] = await conn.execute(
+        `INSERT INTO personajes (nombre, descripcion, tipo, serie_id) VALUES (?, ?, ?, ?)`,
+        [personaje.nombre, personaje.descripcion, personaje.tipo, serieId]
+      );
+      personaje.id = personajeResult.insertId;
+    }
+
+    for (const lugar of personaje.lugares) {
+      if (lugar.id) {
+        await conn.execute(
+          `UPDATE lugares SET nombre = ?, caracteristicas = ? WHERE id = ?`,
+          [lugar.nombre, lugar.caracteristicas, lugar.id]
+        );
+      } else {
+        await conn.execute(
+          `INSERT INTO lugares (nombre, caracteristicas, personaje_id) VALUES (?, ?, ?)`,
+          [lugar.nombre, lugar.caracteristicas, personaje.id]
+        );
+      }
     }
   }
 
