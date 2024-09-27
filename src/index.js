@@ -1,18 +1,17 @@
-const express = require('express');
-const cors = require('cors');
+const getConnection = require('./db');
+const getServer = require('./server');
 
-const server = express();
+const server = getServer();
 
-server.use(cors());
-server.use(express.json());
+server.get('/series',async (_, res) => {
+  const conn = await getConnection();
+  
+  if(!conn) {
+    res.status(500).send('Se rompió');
+    return;
+  }
 
-const port = 4000;
+  const [results] = await conn.query('Select * from serie;');
 
-server.listen( port, () => {
-  console.log(`Servidor iniciado escuchando en http://localhost:${port}`);
+  res.send(results);
 });
-
-server.get('/', (_, res) => {
-  res.send('ozu killo que jartura');
-});
-
