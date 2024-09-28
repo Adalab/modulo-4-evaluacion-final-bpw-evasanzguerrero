@@ -239,8 +239,6 @@ server.post('/series', async(req, res) => {
     res.status(500).send('Se rompió');
     return;
   }
-
-  console.log(req.body)
   
   const [results] = await conn.execute(
     `INSERT INTO series (titulo, creador, lanzamiento, genero) VALUES (?, ?, ?, ?)` ,
@@ -320,3 +318,38 @@ server.post('/series/:id', async(req, res) => {
 
   conn.close();
 });
+
+server.delete('/series/:id', async(req, res) => {
+  const conn = await getConnection();
+  
+  if (!conn) {
+    res.status(500).send('Se rompió');
+    return;
+  }
+
+  const serieId = req.params.id;
+
+  const [personajesResult] = await conn.query('Select * from personajes where serie_id=?;',[serieId]);
+  for(const personaje of personajesResult) {
+    await conn.execute(
+      `DELETE FROM lugares WHERE personaje_id = ?`,
+      [personaje.id]
+    );
+    await conn.execute(
+      `DELETE FROM personajes WHERE id = ?`,
+      [personaje.id]
+    );
+  }
+
+  await conn.execute(
+    `DELETE FROM series WHERE id = ?`,
+    [serieId]
+  );
+
+  res.json({
+    success: true,
+    id: serieId
+  });
+
+  conn.close();
+})
