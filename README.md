@@ -22,10 +22,11 @@ DB_database= 'DBNAME'
 
 # Como consumir el api
 
-Para facilitar las pruebas con el api rest, he adjuntado un initial.sql, que podrías lanzar una vez creado el schema.
+Para facilitar las pruebas con el api rest, he adjuntado un [INITIAL.SQL](docs/initial.sql), que podrías lanzar una vez creado el schema.
 
 > [!WARNING]  
 > Lanzar el initial.sql con la db limpia
 
 ### Postman
+
 He añadido tambien un postman para facilitar el testing de la api [COLECTION](docs/modulo-4-evaluacion.postman_collection.json)
