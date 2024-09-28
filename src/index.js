@@ -11,11 +11,30 @@ server.get('/series',async (_, res) => {
     return;
   }
 
-  const [results] = await conn.query('Select * from series;');
+  const [seriesResult] = await conn.query('Select * from series;');
+  const series = []
+
+  for(const serie of seriesResult) {
+    const serieData = {
+      ...serie,
+      personajes: []
+    };
+    const [personajesResult] = await conn.query('Select * from personajes where serie_id = ?;',[serie.id]);
+    for(const personaje of personajesResult) {
+      const personajeData = {
+        ...personaje,
+        lugares: []
+      };
+      const [lugaresResult] = await conn.query('Select * from lugares where personaje_id=?;',[personaje.id]);
+      personajeData.lugares = lugaresResult;
+      serieData.personajes.push(personajeData);
+    }    
+    series.push(serieData);
+  }
 
   const data = {
     success: true,
-    series: results
+    series: series
   };
   res.json(data);
 
@@ -30,11 +49,31 @@ server.get('/series/:id',async (req, res) => {
     return;
   }
 
-  const [results] = await conn.query('Select * from series where id=?;',[req.params.id]);
+  const [seriesResult] = await conn.query('Select * from series where id=?;',[req.params.id]);
 
+  const series = []
+
+  for(const serie of seriesResult) {
+    const serieData = {
+      ...serie,
+      personajes: []
+    };
+    const [personajesResult] = await conn.query('Select * from personajes where serie_id = ?;',[serie.id]);
+    for(const personaje of personajesResult) {
+      const personajeData = {
+        ...personaje,
+        lugares: []
+      };
+      const [lugaresResult] = await conn.query('Select * from lugares where personaje_id=?;',[personaje.id]);
+      personajeData.lugares = lugaresResult;
+      serieData.personajes.push(personajeData);
+    }    
+    series.push(serieData);
+  }
+  
   const data = {
     success: true,
-    serie: results
+    serie: series
   };
   res.json(data);
 
@@ -68,11 +107,29 @@ server.get('/series/titulo/:titulo',async (req, res) => {
     return;
   }
   
-  const [results] = await conn.query('Select * from series where titulo like ?;',[`%${req.params.titulo}%`]);
+  const [seriesResult] = await conn.query('Select * from series where titulo like ?;',[`%${req.params.titulo}%`]);
+  const series = []
 
+  for(const serie of seriesResult) {
+    const serieData = {
+      ...serie,
+      personajes: []
+    };
+    const [personajesResult] = await conn.query('Select * from personajes where serie_id = ?;',[serie.id]);
+    for(const personaje of personajesResult) {
+      const personajeData = {
+        ...personaje,
+        lugares: []
+      };
+      const [lugaresResult] = await conn.query('Select * from lugares where personaje_id=?;',[personaje.id]);
+      personajeData.lugares = lugaresResult;
+      serieData.personajes.push(personajeData);
+    }    
+    series.push(serieData);
+  }
   const data = {
     success: true,
-    series: results
+    series: series
   };
   res.json(data);
 
