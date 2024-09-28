@@ -1,0 +1,330 @@
+{
+	"info": {
+		"_postman_id": "579b4a85-7504-420c-8806-2ebb2a1317b1",
+		"name": "modulo-4-evaluacion",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "38653746"
+	},
+	"item": [
+		{
+			"name": "series",
+			"item": [
+				{
+					"name": "series",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:4000/series",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"series"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "series by id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:4000/series/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"series",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "series by title",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:4000/series/titulo/:titulo",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"series",
+								"titulo",
+								":titulo"
+							],
+							"variable": [
+								{
+									"key": "titulo",
+									"value": "theory"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "series",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "\n{\n    \"titulo\": \"This Is Us\",\n    \"creador\": \"Dan Fogelman\",\n    \"lanzamiento\": \"2016-09-20\",\n    \"genero\": \"Drama\",\n    \"personajes\": [\n        {\n            \"nombre\": \"Rebecca Pearson\",\n            \"descripcion\": \"Esposa de Jack\",\n            \"tipo\": \"Protagonista\",\n            \"lugares\": [\n            {\n                \"nombre\": \"Casa de los Pearson\",\n                \"caracteristicas\": \"El hogar familiar donde Rebecca vive con Jack y sus hijos\"\n            }\n            ]\n        },\n        {\n            \"nombre\": \"Randall Pearson\",\n            \"descripcion\": \"Hijo adoptivo\",\n            \"tipo\": \"Protagonista\",\n            \"lugares\": [\n            {\n                \"nombre\": \"Casa de Randall\",\n                \"caracteristicas\": \"El hogar que Randall comparte con su esposa Beth y sus hijas\"\n            }\n            ]\n        }\n    ]\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4000/series",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"series"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "series update",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"titulo\": \"After Life\",\n    \"creador\": \"Ricky Gervais\",\n    \"lanzamiento\": \"2019-03-07\",\n    \"genero\": \"Comedia dramática\",\n    \"personajes\": [\n        {\n            \"id\": 1,\n            \"nombre\": \"Tony Johnson\",\n            \"descripcion\": \"Un periodista que lidia con la muerte de su esposa\",\n            \"tipo\": \"humano\",\n            \"serie_id\": 1,\n            \"lugares\": [\n                {\n                    \"id\": 1,\n                    \"nombre\": \"Cafetería local\",\n                    \"caracteristicas\": \"Lugar donde Tony suele reflexionar\",\n                    \"personaje_id\": 1\n                }\n            ]\n        },\n        {\n            \"id\": 2,\n            \"nombre\": \"Lisa\",\n            \"descripcion\": \"La esposa fallecida de Tony\",\n            \"tipo\": \"humano\",\n            \"serie_id\": 1,\n            \"lugares\": [\n                {\n                    \"id\": 2,\n                    \"nombre\": \"Parque\",\n                    \"caracteristicas\": \"Donde Tony pasea y recuerda a su esposa\",\n                    \"personaje_id\": 2\n                }\n            ]\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4000/series/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"series",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "series by id",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:4000/series/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"series",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "personajes",
+			"item": [
+				{
+					"name": "personajes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:4000/personajes",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"personajes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "personajes by id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:4000/personajes/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"personajes",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "personajes by series id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:4000/series/:id/personajes",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"series",
+								":id",
+								"personajes"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "personajes by nombre",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:4000/personajes/nombre/:nombre",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"personajes",
+								"nombre",
+								":nombre"
+							],
+							"variable": [
+								{
+									"key": "nombre",
+									"value": "garga"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "lugares",
+			"item": [
+				{
+					"name": "lugares",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:4000/lugares",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"lugares"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "lugares by id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:4000/lugares/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"lugares",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
