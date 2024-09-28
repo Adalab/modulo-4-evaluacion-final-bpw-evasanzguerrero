@@ -240,29 +240,38 @@ server.post('/series', async(req, res) => {
     return;
   }
   
-  const [results] = await conn.execute(
-    `INSERT INTO series (titulo, creador, lanzamiento, genero) VALUES (?, ?, ?, ?)` ,
-    [req.body.titulo, req.body.creador, req.body.lanzamiento, req.body.genero]);
-    
-  const serieId = results.insertId;
+  try {
+    await conn.beginTransaction();
+    const [results] = await conn.execute(
+      `INSERT INTO series (titulo, creador, lanzamiento, genero) VALUES (?, ?, ?, ?)` ,
+      [req.body.titulo, req.body.creador, req.body.lanzamiento, req.body.genero]);
+      
+    const serieId = results.insertId;
 
-  for (const personaje of req.body.personajes) {
-    const [personajeResult] = await conn.execute(
-      `INSERT INTO personajes (nombre, descripcion, tipo, serie_id) VALUES (?, ?, ?, ?)` ,
-      [personaje.nombre, personaje.descripcion, personaje.tipo, serieId]);
-    const personajeId = personajeResult.insertId;
-    
-    for (const lugar of personaje.lugares) {
-      await conn.execute(
-        `INSERT INTO lugares (nombre, caracteristicas, personaje_id) VALUES (?, ?, ?)` ,
-        [lugar.nombre, lugar.caracteristicas, personajeId]);
-    }
+    for (const personaje of req.body.personajes) {
+      const [personajeResult] = await conn.execute(
+        `INSERT INTO personajes (nombre, descripcion, tipo, serie_id) VALUES (?, ?, ?, ?)` ,
+        [personaje.nombre, personaje.descripcion, personaje.tipo, serieId]);
+      const personajeId = personajeResult.insertId;
+      
+      for (const lugar of personaje.lugares) {
+        await conn.execute(
+          `INSERT INTO lugares (nombre, caracteristicas, personaje_id) VALUES (?, ?, ?)` ,
+          [lugar.nombre, lugar.caracteristicas, personajeId]);
+      }
+    } 
+    await conn.commit();
+    res.json({
+      success: true,
+      id: serieId
+    });
+  } catch (err) {
+    await conn.rollback();
+    res.json({
+      success: false,
+      id: serieId
+    });
   }
-
-  res.json({
-    success: true,
-    id: serieId
-  });
 
   conn.close();
 });
@@ -277,45 +286,53 @@ server.post('/series/:id', async(req, res) => {
 
   const serieId = req.params.id;
 
-  await conn.execute(
-    `UPDATE series SET titulo = ?, creador = ?, lanzamiento = ?, genero = ? WHERE id = ?`,
-    [req.body.titulo, req.body.creador, req.body.lanzamiento, req.body.genero, serieId]
-  );
+  try {
+    await conn.beginTransaction();
+    await conn.execute(
+      `UPDATE series SET titulo = ?, creador = ?, lanzamiento = ?, genero = ? WHERE id = ?`,
+      [req.body.titulo, req.body.creador, req.body.lanzamiento, req.body.genero, serieId]
+    );
 
-  for (const personaje of req.body.personajes) {
-    if (personaje.id) {
-      await conn.execute(
-        `UPDATE personajes SET nombre = ?, descripcion = ?, tipo = ? WHERE id = ?`,
-        [personaje.nombre, personaje.descripcion, personaje.tipo, personaje.id]
-      );
-    } else {
-      const [personajeResult] = await conn.execute(
-        `INSERT INTO personajes (nombre, descripcion, tipo, serie_id) VALUES (?, ?, ?, ?)`,
-        [personaje.nombre, personaje.descripcion, personaje.tipo, serieId]
-      );
-      personaje.id = personajeResult.insertId;
-    }
-
-    for (const lugar of personaje.lugares) {
-      if (lugar.id) {
+    for (const personaje of req.body.personajes) {
+      if (personaje.id) {
         await conn.execute(
-          `UPDATE lugares SET nombre = ?, caracteristicas = ? WHERE id = ?`,
-          [lugar.nombre, lugar.caracteristicas, lugar.id]
+          `UPDATE personajes SET nombre = ?, descripcion = ?, tipo = ? WHERE id = ?`,
+          [personaje.nombre, personaje.descripcion, personaje.tipo, personaje.id]
         );
       } else {
-        await conn.execute(
-          `INSERT INTO lugares (nombre, caracteristicas, personaje_id) VALUES (?, ?, ?)`,
-          [lugar.nombre, lugar.caracteristicas, personaje.id]
+        const [personajeResult] = await conn.execute(
+          `INSERT INTO personajes (nombre, descripcion, tipo, serie_id) VALUES (?, ?, ?, ?)`,
+          [personaje.nombre, personaje.descripcion, personaje.tipo, serieId]
         );
+        personaje.id = personajeResult.insertId;
+      }
+
+      for (const lugar of personaje.lugares) {
+        if (lugar.id) {
+          await conn.execute(
+            `UPDATE lugares SET nombre = ?, caracteristicas = ? WHERE id = ?`,
+            [lugar.nombre, lugar.caracteristicas, lugar.id]
+          );
+        } else {
+          await conn.execute(
+            `INSERT INTO lugares (nombre, caracteristicas, personaje_id) VALUES (?, ?, ?)`,
+            [lugar.nombre, lugar.caracteristicas, personaje.id]
+          );
+        }
       }
     }
+    await conn.commit();
+    res.json({
+      success: true,
+      id: serieId
+    });
+  } catch (err) {
+    await conn.rollback();
+    res.json({
+      success: false,
+      id: serieId
+    });
   }
-
-  res.json({
-    success: true,
-    id: serieId
-  });
-
   conn.close();
 });
 
@@ -329,27 +346,36 @@ server.delete('/series/:id', async(req, res) => {
 
   const serieId = req.params.id;
 
-  const [personajesResult] = await conn.query('Select * from personajes where serie_id=?;',[serieId]);
-  for(const personaje of personajesResult) {
+  try {
+    const [personajesResult] = await conn.query('Select * from personajes where serie_id=?;',[serieId]);
+    await conn.beginTransaction();
+    for(const personaje of personajesResult) {
+      await conn.execute(
+        `DELETE FROM lugares WHERE personaje_id = ?`,
+        [personaje.id]
+      );
+      await conn.execute(
+        `DELETE FROM personajes WHERE id = ?`,
+        [personaje.id]
+      );
+    }
     await conn.execute(
-      `DELETE FROM lugares WHERE personaje_id = ?`,
-      [personaje.id]
+      `DELETE FROM series WHERE id = ?`,
+      [serieId]
     );
-    await conn.execute(
-      `DELETE FROM personajes WHERE id = ?`,
-      [personaje.id]
-    );
+
+    await conn.commit();
+    res.json({
+      success: true,
+      id: serieId
+    });
+  } catch (err) {
+    await conn.rollback();
+    res.json({
+      success: false,
+      id: serieId
+    });
   }
-
-  await conn.execute(
-    `DELETE FROM series WHERE id = ?`,
-    [serieId]
-  );
-
-  res.json({
-    success: true,
-    id: serieId
-  });
-
   conn.close();
+
 })
